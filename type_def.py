@@ -1,0 +1,31 @@
+import sqlalchemy
+
+type_dict = {
+    'agency': [('agency_url', sqlalchemy.types.Text), ('agency_name', sqlalchemy.types.Text),
+               ('agency_timezone', sqlalchemy.types.Text), ('agency_id', sqlalchemy.types.Text),
+               ('agency_lang', sqlalchemy.types.Text)],
+    'calendar_dates': [('date', sqlalchemy.types.Integer), ('service_id', sqlalchemy.types.Text),
+                ('exception_type', sqlalchemy.types.Integer)],
+    'fare_attributes': [('payment_method', sqlalchemy.types.Integer), ('price', sqlalchemy.types.Numeric),
+                       ('currency_type', sqlalchemy.types.Text), ('fare_id', sqlalchemy.types.Text),
+                       ('transfer_duration', sqlalchemy.types.Integer), ('transfers', sqlalchemy.types.Text)],
+    'fare_rules': [('route_id', sqlalchemy.types.Integer), ('fare_id', sqlalchemy.types.Text),
+                 ('contains_id', sqlalchemy.types.Text), ('destination_id', sqlalchemy.types.Text),
+                 ('origin_id', sqlalchemy.types.Text)],
+    'frequencies': [('headway_secs', sqlalchemy.types.Integer), ('start_time', sqlalchemy.types.Interval),
+                  ('trip_id', sqlalchemy.types.Text), ('end_time', sqlalchemy.types.Text)],
+    'routes': [('route_long_name', sqlalchemy.types.Text), ('route_type', sqlalchemy.types.Integer),
+            ('route_text_color', sqlalchemy.types.Text), ('route_color', sqlalchemy.types.Text),
+            ('agency_id', sqlalchemy.types.Text), ('route_id', sqlalchemy.types.Integer),
+            ('route_url', sqlalchemy.types.Text), ('route_short_name', sqlalchemy.types.Integer)],
+    'shapes': [('shape_pt_lat', sqlalchemy.types.Numeric), ('shape_id', sqlalchemy.types.Text),
+            ('shape_pt_lon', sqlalchemy.types.Numeric), ('shape_pt_sequence', sqlalchemy.types.Text)],
+    'stop_times': [('arrival_time', sqlalchemy.types.Interval), ('trip_id', sqlalchemy.types.Text),
+                ('stop_sequence', sqlalchemy.types.Integer), ('departure_time', sqlalchemy.types.Interval),
+                ('stop_id', sqlalchemy.types.Integer)],
+    'stops': [('stop_lat', sqlalchemy.types.Numeric), ('wheelchair_boarding', sqlalchemy.types.Integer),
+            ('stop_code', sqlalchemy.types.Integer), ('stop_lon', sqlalchemy.types.Numeric),
+            ('stop_url', sqlalchemy.types.Text), ('stop_id', sqlalchemy.types.Integer), ('stop_name', sqlalchemy.types.Text)],
+    'trips': [('wheelchair_accessible', sqlalchemy.types.Text), ('route_id', sqlalchemy.types.Integer),
+              ('trip_id', sqlalchemy.types.Text), ('trip_headsign', sqlalchemy.types.Text), ('service_id', sqlalchemy.types.Text)]
+    }

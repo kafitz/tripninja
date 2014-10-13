@@ -52,3 +52,25 @@ docs/_build/
 
 # PyBuilder
 target/
+
+static/geo/gtfs_stm.db
+
+static/geo/gtfs_stm/agency.txt
+
+static/geo/gtfs_stm/calendar_dates.txt
+
+static/geo/gtfs_stm/fare_attributes.txt
+
+static/geo/gtfs_stm/fare_rules.txt
+
+static/geo/gtfs_stm/frequencies.txt
+
+static/geo/gtfs_stm/routes.txt
+
+static/geo/gtfs_stm/shapes.txt
+
+static/geo/gtfs_stm/stop_times.txt
+
+static/geo/gtfs_stm/stops.txt
+
+static/geo/gtfs_stm/trips.txt

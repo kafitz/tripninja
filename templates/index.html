@@ -1,0 +1,63 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MtlBusNinja</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins/timeline/timeline.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins/leaflet/leaflet.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sb-admin.css') }}" />    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}" />
+</head>
+
+<body>
+    <script src="{{ url_for('static', filename='js/jquery-1.10.2.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/metisMenu/jquery.metisMenu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sb-admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/leaflet/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/leaflet/leaflet_providers.js') }}"></script>
+    <div id="wrapper">
+        <!-- top navbar -->
+        <nav class="navbar navbar-default" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#"><i class="fa fa-bus"></i> Where's My Bus?</a>
+            </div>
+        </nav>
+        <!-- Main frame -->
+        <div id="page-wrapper">
+            <div class="row"><div class="col-lg-12"></div></div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <br />
+                    <div style="width:85%;margin:auto;">
+                        <p>BusNinja is map for displaying STM buses currently active (-5/+10 minutes) within
+                           the city of Montréal using the <a href="http://www.stm.info/en/about/developers">public 
+                           GTFS transit feed</a>. BusNinja is currently under development and subject to change. Displayed
+                           routes are cached within the browser to minimize unnecessary traffic and keep things quicker; to
+                           update previously displayed routes to the latest 15-minute interval, the page must be refreshed.
+                        </p>
+                    </div>
+                    <!-- map panel -->
+                    {% include 'map_panel.html' %}
+                    <!-- available routes -->
+                </div>
+                <div class="col-lg-12" id="footer">
+                    <p>Kyle Fitzsimmons, 2014</p>
+                </div>                
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+
+</body>
+
+</html>

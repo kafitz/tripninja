@@ -1,0 +1,34 @@
+<div class="panel panel-default">
+    <!-- Map -->
+    <!-- /.panel-heading -->
+    <div class="panel-body">
+        <div id="map"></div>
+        <br />
+        <div class="container">
+            <h6>Click to activate a current bus route (<i>takes a second to appear</i>):</h6>
+        </div>
+        <div class="row-centered">
+            <div class="span-12">
+                <div class="btn-toolbar" role="toolbar" id="active-routes"></div>      
+            </div>
+        </div>
+        <link href="{{ url_for('static', filename='css/plugins/jquery-ui/jquery-ui-1.10.4.min.css') }}" rel='stylesheet' />
+        <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.2/leaflet.fullscreen.css' rel='stylesheet' />
+        <link href="{{ url_for('static', filename='css/plugins/awesome-markers/leaflet.awesome-markers.css') }}" rel='stylesheet' />
+        <link href="{{ url_for('static', filename='css/plugins/timepicker/bootstrap-timepicker.min.css') }}" rel='stylesheet' />
+        <link href="{{ url_for('static', filename='css/map_playback.css') }}" rel='stylesheet' />
+        <script src="{{ url_for('static', filename='js/plugins/jquery-ui/jquery-ui-1.10.4.min.js') }}"></script>
+        <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.2/Leaflet.fullscreen.min.js'></script>
+        <script src="{{ url_for('static', filename='js/plugins/leaflet/leaflet-heat.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plugins/awesome-markers/leaflet.awesome-markers.min.js') }}"></script>
+        <!-- <script src="{{ url_for('static', filename='js/plugins/timepicker/bootstrap-timepicker.min.js') }}"></script> -->
+        <script src="{{ url_for('static', filename='js/plugins/leaflet/LeafletPlayback.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+        <script type="text/javascript">
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            var active_routes = {{ active_routes|safe }};
+        </script>        
+    </div>
+    <!-- /.panel-body -->
+</div>
+<!-- /.panel -->

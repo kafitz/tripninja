@@ -1,0 +1,62 @@
+#map { 
+    height: 550px; 
+}
+
+
+/* Bootstrap overrides*/
+a {
+    color: dimgray;
+}
+
+body {
+    padding-top: 0px;
+}
+
+.navbar-default {
+    background: linear-gradient(#f8f8f8, #F3F6F8);
+}
+
+.btn {
+    width: 50px;
+}
+
+.panel {
+    margin-top: 20px;
+    width: 85%;
+    margin: auto;
+}
+
+.panel-default>.panel-heading {
+    background-color: #F3F6F8;
+}
+
+.panel-body {
+    padding: 0;
+    padding-bottom: 20px;
+    background: #F3F6F8;
+}
+
+#route-grp {
+    float: none;
+}
+.btn-toolbar {
+    float: none;
+    text-align: center;
+}
+
+#page-wrapper {
+    min-height: inherit;
+}
+
+#footer {
+    text-align: right;
+    padding-top: 15px;
+    width: 85%;
+    background-color: white;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+/* sb-admin overrides */
+#search_btn {
+    padding: 9px 12px;
+}
