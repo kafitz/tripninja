@@ -8,8 +8,8 @@ import type_def
 
 
 gtfs_data = 'static/geo/gtfs_stm'
-db_name = 'gtfs_stm.db'
-db = dataset.connect('postgres://postgres:nutun@localhost/gtfs2')
+# db = dataset.connect('postgres://postgres:nutun@localhost/gtfs2')
+db = dataset.connect('sqlite:///./static/geo/gtfs_stm.sqlite')
 
 # gather all gtfs .txt files in given directory
 files = []
@@ -70,6 +70,4 @@ for table, indices in index_dict.iteritems():
     print('Creating index on {}'.format(table))
     db[table].create_index(indices)
 
-# needed view
-# SELECT t.id FROM trips t INNER JOIN stop_times s ON t.trip_id = s.trip_id WHERE t.service_id = '14S_I' AND s.arrival_time BETWEEN '18:09:52' AND '18:19:52' GROUP BY t.trip_id
 

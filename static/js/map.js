@@ -36,11 +36,13 @@ L.control.fullscreen().addTo(map);
 
 // // STM bus routes and animation variables
 var enabled_routes = {'features': [], 'type': "FeatureCollection"};
+var enabled_routes_nums = [];
 var playback = null;
 var geojsons = new Array();
 var layers = new Array();
 function addRoutes(route_num) {
     var selected;
+    enabled_routes_nums.push(route_num);
     if (layers[route_num]) {
         route_layer = layers[route_num];
         selected = geojsons[route_num].features;
@@ -65,6 +67,7 @@ function addRoutes(route_num) {
                 sliderControl: true,
                 playControl: true,
                 speed: 150000,
+                tickLen: 1000,                
                 marker: function(){
                     return {
                         icon: L.AwesomeMarkers.icon({
@@ -107,6 +110,14 @@ function getStyle() {
     };
 }
 
+// get unique route nums from array list to maintain enabled routes buttons
+var uniqueRoutes = function(a) {
+    return a.reduce(function(p, c) {
+        if (p.indexOf(c) < 0) p.push(c);
+        return p;
+    }, []);
+}
+
 // Autosizing of available routes toolbar
 $(window).on('resize', function(){
     width = $(".panel").width();
@@ -127,6 +138,7 @@ $(window).on('resize', function(){
             groups.push(subgroup);
         }
     });
+    console.log(uniqueRoutes(enabled_routes_nums));
     $.each(groups, function(index, g) {
         $('#active-routes').append(g); 
     });
