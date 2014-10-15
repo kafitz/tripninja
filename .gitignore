@@ -64,3 +64,5 @@ static/geo/gtfs_stm/shapes.txt
 static/geo/gtfs_stm/stop_times.txt
 static/geo/gtfs_stm/stops.txt
 static/geo/gtfs_stm/trips.txt
+
+*.lprof

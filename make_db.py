@@ -21,14 +21,14 @@ create_cur.execute("""CREATE DATABASE gtfs2;""")
 create_cur.close()
 create_conn.close()
 
-# # connect to new database
+# connect to new database
 db_conn = psycopg2.connect(user='kyle', host='localhost', port=5432, database='gtfs2')
 db_cur = db_conn.cursor()
 
 # create table using schema file
 table_defs = type_def.type_dict
 for table, col_defs in table_defs.iteritems():
-    print('Creating tabke {}'.format(table))
+    print('Creating table {}'.format(table))
     create_table_sql = """CREATE TABLE {}(""".format(table)
     for idx, col_def in enumerate(col_defs):
         create_table_sql += """{} {}""".format(*col_def)
@@ -54,7 +54,7 @@ for file_tuple in files:
         db_conn.cursor().copy_expert(sql=copy_sql.format(table_name), file=gtfs_data)
 db_conn.commit()
 
-# tables (keys) to create indices on in db (values)
+# tables (keys) to create indices (values) on in db
 index_dict = {
     'calendar_dates': ['date'],
     'routes': ['route_type'],
@@ -68,13 +68,13 @@ for table, indices in index_dict.iteritems():
     index_sql = """CREATE INDEX {}_idx ON {} (""".format(table, table)
     index_sql += (', ').join(indices)
     index_sql += """);"""
-    print index_sql
     db_cur.execute(index_sql)
 db_conn.commit()
 
 # create view for specific python query (rework this)
 print('Create (temporary) view')
-db_cur.execute("""CREATE VIEW st_join_t AS SELECT t.trip_id, t.route_id, t.service_id, s.arrival_time FROM trips t INNER JOIN stop_times s ON t.trip_id=s.trip_id;""")
+db_cur.execute("""CREATE MATERIALIZED VIEW st_join_t AS SELECT t.trip_id, t.route_id, t.service_id, s.arrival_time FROM trips t INNER JOIN stop_times s ON t.trip_id=s.trip_id;""")
+db_cur.execute("""CREATE INDEX view_idx ON st_join_t (service_id, arrival_time);""")
 db_conn.commit()
 
 # close db connection

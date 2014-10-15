@@ -1,23 +1,28 @@
 #!/usr/bin/env python
 # Kyle Fitzsimmons, 2014
 import time
-import json
 import datetime
-import dataset
+import psycopg2
+import psycopg2.extras
 
-db = dataset.connect('postgres://postgres:nutun@localhost/gtfs')
-# db = dataset.connect('postgres://kyle@localhost/gtfs2')
+# Initialize database connection
+db_conn = psycopg2.connect(user='kyle', host='localhost', port=5432, database='gtfs')
+db_cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 ## Database queries
 def get_schedule(date):
-    schedule = db['calendar_dates'].find_one(date=date)
-    return schedule
+    sql_query = """SELECT service_id FROM calendar_dates WHERE date=%s;"""
+    db_cur.execute(sql_query, (date,))
+    schedule = db_cur.fetchone()
+    if schedule:
+        return schedule[0]
+    else:
+        return None
 
 def get_trips(service_id, times):
-    # sql_query = """SELECT * FROM trips t INNER JOIN stop_times s ON t.trip_id = s.trip_id 
-    #                WHERE t.service_id = '{}' AND s.arrival_time BETWEEN '{}' AND '{}'""".format(service_id, *times)
     sql_query = """SELECT * FROM st_join_t s WHERE service_id='{}' AND arrival_time BETWEEN '{}' AND '{}'""".format(service_id, *times)
-    current_trips = db.executable.execute(sql_query).fetchall()
+    db_cur.execute(sql_query)
+    current_trips = db_cur.fetchall()
     return current_trips
 
 def get_stops(trip_ids):
@@ -29,7 +34,8 @@ def get_stops(trip_ids):
         if idx + 1 != len(trip_ids):
             subquery += ' OR '
     sql_query += subquery
-    stops = db.executable.execute(sql_query).fetchall()
+    db_cur.execute(sql_query)
+    stops = db_cur.fetchall()
     return stops
 
 def get_stops_details(stop_ids):
@@ -41,15 +47,15 @@ def get_stops_details(stop_ids):
         if idx + 1 != len(stop_ids):
             subquery += ' OR '
     sql_query += subquery
-    stops_info = db.executable.execute(sql_query).fetchall()
+    db_cur.execute(sql_query)
+    stops_info = db_cur.fetchall()
     return stops_info
 
 # General functions
 def get_trips_now():
     # find the schedule code in effect for today's date
     today = time.strftime('%Y%m%d')
-    schedule = get_schedule(today)
-    service_id = schedule['service_id']
+    service_id = get_schedule(today)
 
     # get today's trips and group in a dict of routes
     now = datetime.datetime.now()
@@ -77,7 +83,7 @@ def get_trips_now():
             adj_times = (start_time, et)
         trips += get_trips(adj_service_id, adj_times)
 
-    columns = db['st_join_t'].columns
+    columns = ['trip_id', 'route_id', 'service_id', 'arrival_time']
     routes = {}
     for t in trips:
         trip = dict(zip(columns, t))
@@ -147,10 +153,10 @@ def get_trip_points(trip_id, route_id, stops, stops_details):
 
     point_features = []
     for stop_id in stop_ids:
-        details = [d for d in stops_details if d[0] == stop_id][0]
+        details = [d for d in stops_details if d[1] == stop_id][0]
         latitude = float(details['stop_lat'])
         longitude = float(details['stop_lon'])
-        name = details['stop_name'].encode('utf-8')
+        name = details['stop_name']
         # account for unicode extra character in fixed-width display
         spacer = ''
         if len(name) - len(details['stop_name']) == 1:
@@ -162,7 +168,6 @@ def get_trip_points(trip_id, route_id, stops, stops_details):
         properties['stop_code'] = stop_code
 
         point_features.append(point(properties, latitude, longitude))
-        # output = '{} -> {} -- {:40}{}({} [{}]) -- {} ({}, {})'.format(arrival, departure, name, spacer, stop_id, stop_sequence, stop_code, latitude, longitude)
 
     schema = {
         "type": "FeatureCollection",
