@@ -6,8 +6,7 @@ import datetime
 import dataset
 
 db = dataset.connect('postgres://postgres:nutun@localhost/gtfs')
-# db = dataset.connect('postgres://kyle@localhost/gtfs')
-# db = dataset.connect('sqlite:///./static/geo/gtfs_stm.db')
+# db = dataset.connect('postgres://kyle@localhost/gtfs2')
 
 ## Database queries
 def get_schedule(date):
@@ -148,7 +147,7 @@ def get_trip_points(trip_id, route_id, stops, stops_details):
 
     point_features = []
     for stop_id in stop_ids:
-        details = [d for d in stops_details if d[1] == stop_id][0]
+        details = [d for d in stops_details if d[0] == stop_id][0]
         latitude = float(details['stop_lat'])
         longitude = float(details['stop_lon'])
         name = details['stop_name'].encode('utf-8')
