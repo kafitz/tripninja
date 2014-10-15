@@ -1,45 +1,16 @@
-var map = L.map("map", {
-                      zoom: 11,
-                      center: [45.55, -73.7],
-                      attributionControl: false
-                    })
-            .on('dblclick', function(e) {
-                map.setView(e.latlng, map.getZoom() + 1)});
-var defaultLayer = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
+// style route tracks paths
+function getStyle() {
+    return {
+        color: '#666',
+        opacity: 0.5,
+        fillColor: '#ddd',
+        fillOpacity: 0.4,
+        weight: 1.5
+    };
+}
 
-// var baseLayers = {
-//     'OpenStreetMap Default': defaultLayer,
-//     'Thunderforest OpenCycleMap': L.tileLayer.provider('Thunderforest.OpenCycleMap'),
-//     'Thunderforest Transport': L.tileLayer.provider('Thunderforest.Transport'),
-//     'Thunderforest Landscape': L.tileLayer.provider('Thunderforest.Landscape'),
-//     'Stamen Toner': L.tileLayer.provider('Stamen.Toner'),
-//     'Stamen Watercolor': L.tileLayer.provider('Stamen.Watercolor'),
-//     'Esri WorldImagery': L.tileLayer.provider('Esri.WorldImagery'),
-//     'Esri OceanBasemap': L.tileLayer.provider('Esri.OceanBasemap'),
-// };
-
-// var overlayLayers = {
-//     'OpenSeaMap': L.tileLayer.provider('OpenSeaMap'),
-//     'OpenWeatherMap Clouds': L.tileLayer.provider('OpenWeatherMap.Clouds'),
-//     'OpenWeatherMap CloudsClassic': L.tileLayer.provider('OpenWeatherMap.CloudsClassic'),
-//     'OpenWeatherMap Precipitation': L.tileLayer.provider('OpenWeatherMap.Precipitation'),
-//     'OpenWeatherMap Rain': L.tileLayer.provider('OpenWeatherMap.Rain'),
-//     'OpenWeatherMap Pressure': L.tileLayer.provider('OpenWeatherMap.Pressure'),
-//     'OpenWeatherMap PressureContour': L.tileLayer.provider('OpenWeatherMap.PressureContour'),
-//     'OpenWeatherMap Wind': L.tileLayer.provider('OpenWeatherMap.Wind'),
-//     'OpenWeatherMap Temperature': L.tileLayer.provider('OpenWeatherMap.Temperature'),
-//     'OpenWeatherMap Snow': L.tileLayer.provider('OpenWeatherMap.Snow')
-// };
-
-// var layerControl = L.control.layers(baseLayers, overlayLayers, {collapsed: true}).addTo(map);
-L.control.fullscreen().addTo(map);
-
-// // STM bus routes and animation variables
-var enabled_routes = {'features': [], 'type': "FeatureCollection"};
-var enabled_routes_nums = [];
-var playback = null;
-var geojsons = new Array();
-var layers = new Array();
+// try to add cached route (previously clicked), otherwise
+// load geojson from server via AJAX call 
 function addRoutes(route_num) {
     var selected;
     enabled_routes_nums.push(route_num);
@@ -87,27 +58,23 @@ function addRoutes(route_num) {
     }
 }
 
+// create new feature based using all routes not matching unclicked route
+// and set as new leaflet-playback data
 function delRoutes(route_num) {
     var updated_routes = {'features': [], 'type': "FeatureCollection"};
+    var updated_routes_nums = [];
     map.removeLayer(layers[route_num]);
     enabled_routes.features.map(function(d, i) {
-        if (d.properties.route_id != route_num) {
+        route_id = "route" + d.properties.route_id;
+        console.log([i, route_id, route_num]);
+        if (route_id != route_num) {
             updated_routes.features.push(d);
+            updated_routes_nums.push(route_id);
         }
     });
     enabled_routes = updated_routes;
+    enabled_routes_nums = updated_routes_nums;
     playback.setData(enabled_routes.features);
-}
-
-// style mtl_layers paths
-function getStyle() {
-    return {
-        color: '#666',
-        opacity: 0.5,
-        fillColor: '#ddd',
-        fillOpacity: 0.4,
-        weight: 1.5
-    };
 }
 
 // get unique route nums from array list to maintain enabled routes buttons
@@ -118,31 +85,54 @@ var uniqueRoutes = function(a) {
     }, []);
 }
 
-// Autosizing of available routes toolbar
+
+// globals
+var enabled_routes = {'features': [], 'type': "FeatureCollection"};
+var enabled_routes_nums = []; // <-- merged into enabled routes object?
+var playback = null;
+var geojsons = new Array();
+var layers = new Array();
+// Load leaflet map centered on Montreal w/ double-click to zoom
+var map = L.map("map", {
+                      zoom: 11,
+                      center: [45.55, -73.7],
+                      attributionControl: false
+                    })
+            .on('dblclick', function(e) {
+                map.setView(e.latlng, map.getZoom() + 1)});
+var defaultLayer = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
+L.control.fullscreen().addTo(map); // provided by Mapbox leaflet fullscreen
+
+// Autosizing of available routes toolbar on browser resize
 $(window).on('resize', function(){
+    // Calculate the number of buttons (50px) per row off div width
     width = $(".panel").width();
     num_buttons = Math.floor(width / 50) - 2;
-    $('#active-routes').empty();
-    var groups = [['<div class="btn-group" data-toggle="buttons" id="route-grp">']];
+    // Create an array of new elements to replace old rows
+    var groups = [['<div class="btn-group route-grp" data-toggle="buttons">']];
     $.each(active_routes, function(index, route) {
         if ((index + 1) % num_buttons == 0) {
             var subgroup = groups.pop();
-            subgroup = subgroup + '<label class="btn btn-primary">' + '<input type="checkbox" class="bus-routes" id="' + route + '">' + route + '</label>';
-            subgroup = subgroup + '</div>';
-            groups.push(subgroup);
-            groups.push('<div class="btn-group" data-toggle="buttons" id="route-grp">');
-            // $('#active-routes').append('<br /><br /><div class="btn-group" data-toggle="buttons" id="route-grp-' + route + ' + ">');
+            subgroup = subgroup + '<label class="btn btn-primary" id="route' + route + '_lbl">' 
+                     + '<input type="checkbox" class="bus-routes" id="route' 
+                     + route + '">' + route 
+                     + '</label></div>';
+            groups.push(subgroup, '<div class="btn-group route-grp" data-toggle="buttons">');
         } else {
             var subgroup = groups.pop();
-            subgroup = subgroup + '<label class="btn btn-primary">' + '<input type="checkbox" class="bus-routes" id="' + route + '">' + route + '</label>';
+            subgroup = subgroup + '<label class="btn btn-primary" id="route' + route + '_lbl">' 
+                     + '<input type="checkbox" class="bus-routes" id="route' 
+                     + route + '">' + route + '</label>';
             groups.push(subgroup);
         }
     });
-    console.log(uniqueRoutes(enabled_routes_nums));
-    $.each(groups, function(index, g) {
-        $('#active-routes').append(g); 
-    });
-    // add/remove routes on click
+
+    // Clear route table and add new arrangement of rows
+    $('#active-routes').empty();
+    var divs = groups.join([separator = '']);
+    $('#active-routes').append(divs);
+
+    // Add jquery binding to add/remove routes from table on click
     $('.bus-routes').change(function(e) {
         if (this.checked) {
             addRoutes(this.id);
@@ -150,7 +140,19 @@ $(window).on('resize', function(){
             delRoutes(this.id);
         }
     });
+
+    // re-enable old selections to new divs:
+    // add 'active' class to outer <label>; check inner <input>
+    $.each(enabled_routes_nums, function(e, route) {
+        var div = $('#' + route);
+        var div_lbl = $('#' + route + '_lbl');
+        div.prop('checked', true);
+        div_lbl.addClass('active');
+    });
+
 });
+
+
 // apply to both initial load and window resize
 $(document).ready(function() {
     $(window).trigger('resize');

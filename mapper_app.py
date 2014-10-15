@@ -15,7 +15,7 @@ def hello():
     cache.set('routes', routes, timeout=3 * 60)
     return render_template('index.html', active_routes=route_nums)
 
-@app.route("/<int:route>")
+@app.route("/route<int:route>")
 def get_geojson(route):
     available_routes = cache.get('routes')
     if not available_routes:

@@ -6,6 +6,7 @@ import datetime
 import dataset
 
 db = dataset.connect('postgres://postgres:nutun@localhost/gtfs')
+# db = dataset.connect('postgres://kyle@localhost/gtfs')
 # db = dataset.connect('sqlite:///./static/geo/gtfs_stm.db')
 
 ## Database queries

@@ -25,6 +25,11 @@ body {
     width: 85%;
     margin: auto;
 }
+@media (max-width: 1000px) {
+    .panel {
+        width: 100%;
+    }
+}
 
 .panel-default>.panel-heading {
     background-color: #F3F6F8;
@@ -36,12 +41,13 @@ body {
     background: #F3F6F8;
 }
 
-#route-grp {
-    float: none;
-}
 .btn-toolbar {
     float: none;
     text-align: center;
+}
+
+.btn-toolbar>.route-grp {
+    float: none;
 }
 
 #page-wrapper {
