@@ -2,12 +2,28 @@
 # Kyle Fitzsimmons, 2014
 import time
 import datetime
+import ConfigParser
 import psycopg2
 import psycopg2.extras
+import type_def
 
+# database parameters
+conf = ConfigParser.ConfigParser()
+conf.read('database.conf')
+db_name = conf.get('postgres', 'database')
+db_user = conf.get('postgres', 'username')
+db_pass = conf.get('postgres', 'password')
+db_host = conf.get('postgres', 'host')
+db_port = conf.getint('postgres', 'port')
+sql_schema = type_def.gtfs_schemas[conf.get('postgres', 'agency_schema')]
 # Initialize database connection
-db_conn = psycopg2.connect(user='kyle', host='localhost', port=5432, database='gtfs')
+db_conn = psycopg2.connect(user=db_user, 
+                           password=db_pass, 
+                           host=db_host, 
+                           port=db_port, 
+                           database=db_name)
 db_cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
 
 ## Database queries
 def get_schedule(date):
@@ -28,12 +44,10 @@ def get_trips(service_id, times):
 def get_stops(trip_ids):
     sql_query = """SELECT arrival_time, departure_time, stop_sequence, stop_id, trip_id FROM stop_times
                    WHERE """
-    subquery = ''
     for idx, trip_id in enumerate(trip_ids):
-        subquery += "trip_id='{}'".format(trip_id)
+        sql_query += "trip_id='{}'".format(trip_id)
         if idx + 1 != len(trip_ids):
-            subquery += ' OR '
-    sql_query += subquery
+            sql_query += ' OR '
     db_cur.execute(sql_query)
     stops = db_cur.fetchall()
     return stops
@@ -41,15 +55,14 @@ def get_stops(trip_ids):
 def get_stops_details(stop_ids):
     # stop_info = db['stops'].find_one(stop_id=int(stop_id))
     sql_query = """SELECT * FROM stops WHERE """
-    subquery = ''
     for idx, stop_id in enumerate(stop_ids):
-        subquery += 'stop_id={}'.format(stop_id)
+        sql_query += 'stop_id={}'.format(stop_id)
         if idx + 1 != len(stop_ids):
-            subquery += ' OR '
-    sql_query += subquery
+            sql_query += ' OR '
     db_cur.execute(sql_query)
     stops_info = db_cur.fetchall()
     return stops_info
+
 
 # General functions
 def get_trips_now():
@@ -73,8 +86,7 @@ def get_trips_now():
         et = str(end_time.hour + 24) + end_time.strftime(":%M:%S")
     if st or et:
         yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%Y%m%d')
-        schedule = get_schedule(yesterday)
-        adj_service_id = schedule['service_id']
+        adj_service_id = get_schedule(yesterday)
         if st and et:
             adj_times = (st, et)
         elif st:
@@ -152,8 +164,9 @@ def get_trip_points(trip_id, route_id, stops, stops_details):
         stop_ids.append(stop_id)
 
     point_features = []
+    details_dict = {s['stop_id']: s for s in stops_details}
     for stop_id in stop_ids:
-        details = [d for d in stops_details if d[1] == stop_id][0]
+        details = details_dict[stop_id]
         latitude = float(details['stop_lat'])
         longitude = float(details['stop_lon'])
         name = details['stop_name']
@@ -204,8 +217,12 @@ def points_to_line(all_points):
 def route_geojson(routes, selected_route):
     all_points = []
     trip_ids = []
+    selected_features = routes.get(selected_route)
+    if not selected_features:
+        return None
+
     # get trip and route ids of trips now for selected route
-    for idx, r in enumerate(routes[selected_route]):
+    for idx, r in enumerate(selected_features):
         trip_id, route_id = r['trip_id'], r['route_id']
         trip_ids.append(trip_id)
     
@@ -224,7 +241,7 @@ def route_geojson(routes, selected_route):
     stops_details = get_stops_details(stop_ids)
 
     # get each bus trip as a geojson feature
-    for idx, r in enumerate(routes[selected_route]):
+    for idx, r in enumerate(selected_features):
         trip_id, route_id = r['trip_id'], r['route_id']
         trip_stops = stops[trip_id]
         stop_points = get_trip_points(trip_id, route_id, trip_stops, stops_details)

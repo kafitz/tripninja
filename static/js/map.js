@@ -85,7 +85,6 @@ var uniqueRoutes = function(a) {
     }, []);
 }
 
-
 // globals
 var enabled_routes = {'features': [], 'type': "FeatureCollection"};
 var enabled_routes_nums = []; // <-- merged into enabled routes object?
@@ -96,12 +95,13 @@ var layers = new Array();
 var map = L.map("map", {
                       zoom: 11,
                       center: [45.55, -73.7],
-                      attributionControl: false
+                      attributionControl: false,
+                      tap: false
                     })
             .on('dblclick', function(e) {
                 map.setView(e.latlng, map.getZoom() + 1)});
+map.scrollWheelZoom.disable();
 var defaultLayer = L.tileLayer.provider('OpenStreetMap.Mapnik').addTo(map);
-L.control.fullscreen().addTo(map); // provided by Mapbox leaflet fullscreen
 
 // Autosizing of available routes toolbar on browser resize
 $(window).on('resize', function(){

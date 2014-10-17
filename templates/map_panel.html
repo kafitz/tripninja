@@ -12,8 +12,8 @@
                 <div class="btn-toolbar" role="toolbar" id="active-routes"></div>      
             </div>
         </div>
+
         <link href="{{ url_for('static', filename='css/plugins/jquery-ui/jquery-ui-1.10.4.min.css') }}" rel='stylesheet' />
-        <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.2/leaflet.fullscreen.css' rel='stylesheet' />
         <link href="{{ url_for('static', filename='css/plugins/awesome-markers/leaflet.awesome-markers.css') }}" rel='stylesheet' />
         <link href="{{ url_for('static', filename='css/map_playback.css') }}" rel='stylesheet' />
         <script src="{{ url_for('static', filename='js/plugins/jquery-ui/jquery-ui-1.10.4.min.js') }}"></script>
@@ -24,7 +24,7 @@
         <script type="text/javascript">
             $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
             var active_routes = {{ active_routes|safe }};
-        </script>        
+        </script>
     </div>
     <!-- /.panel-body -->
 </div>

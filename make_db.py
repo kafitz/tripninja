@@ -1,9 +1,27 @@
 import os
+import ConfigParser
 import psycopg2
+import fetch_gtfs_data as fetch
 import type_def
 
+# source data
+url = 'http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip'
+
+# database parameters
+conf = ConfigParser.ConfigParser()
+conf.read('database.conf')
+db_name = conf.get('postgres', 'database')
+db_user = conf.get('postgres', 'username')
+db_pass = conf.get('postgres', 'password')
+db_host = conf.get('postgres', 'host')
+db_port = conf.getint('postgres', 'port')
+sql_schema = type_def.gtfs_schemas[conf.get('postgres', 'agency_schema')]
+
+# download data from url and unpack
+# fetch.gtfs_data(url, db_name)
+
 # gather all gtfs .txt files in given directory
-gtfs_data = 'static/geo/gtfs_stm'
+gtfs_data = 'static/geo/' + db_name
 files = []
 for root, directory, filename in os.walk(gtfs_data):
     for f in filename:
@@ -12,22 +30,21 @@ for root, directory, filename in os.walk(gtfs_data):
             files.append((f.split('.')[0], os.path.join(root, f)))
 
 # create the database
-print("Creating new gtfs database...")
-create_conn = psycopg2.connect(user='kyle', host='localhost', port=5432)
+print("Creating new gtfs database: {}...".format(db_name))
+create_conn = psycopg2.connect(user=db_user, password=db_pass, host=db_host, port=db_port)
 create_cur = create_conn.cursor()
 create_conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-create_cur.execute("""DROP DATABASE IF EXISTS gtfs2;""")
-create_cur.execute("""CREATE DATABASE gtfs2;""")
+create_cur.execute("""DROP DATABASE IF EXISTS {};""".format(db_name))
+create_cur.execute("""CREATE DATABASE {};""".format(db_name))
 create_cur.close()
 create_conn.close()
 
 # connect to new database
-db_conn = psycopg2.connect(user='kyle', host='localhost', port=5432, database='gtfs2')
+db_conn = psycopg2.connect(user=db_user, host=db_host, port=db_port, database=db_name)
 db_cur = db_conn.cursor()
 
 # create table using schema file
-table_defs = type_def.type_dict
-for table, col_defs in table_defs.iteritems():
+for table, col_defs in sql_schema.iteritems():
     print('Creating table {}'.format(table))
     create_table_sql = """CREATE TABLE {}(""".format(table)
     for idx, col_def in enumerate(col_defs):
